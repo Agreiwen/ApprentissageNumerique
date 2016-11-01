@@ -202,43 +202,44 @@ public class HMM {
 		State etatAncetre = null;
 		double[][] prob = new double[nbIteration][nbEtats];
 		State[][] ancetre = new State[nbIteration][nbEtats];
+		//initiale = maJTransition(initiale);
 		
 		//System.out.println("Distribution initiale : "+initiale.toString()+"\n\n");
 		
 		for (int i = 0; i < nbIteration; i++) {
 			for (int j = 0; j < nbEtats; j++) {
 				s = new State(j);
-				System.out.print(s.toString()+" ");
-				System.out.print(initiale.getProba(s)+" -> ");
-				System.out.print(this.matriceObservation.probaObservation(obs.get(i), s));
-				System.out.println(" |"+this.matriceObservation.probaObservation(obs.get(i), s)*initiale.getProba(s)+"| ");
+				//System.out.print(s.toString()+" ");
+				//System.out.print(initiale.getProba(s)+" -> ");
+				//System.out.print(this.matriceObservation.probaObservation(obs.get(i), s));
+				//System.out.println(" |"+this.matriceObservation.probaObservation(obs.get(i), s)*initiale.getProba(s)+"| ");
 				prob[i][j] = this.matriceObservation.probaObservation(obs.get(i), s)*initiale.getProba(s);
 			}
 		
 		
-			System.out.println("\n");
+			//System.out.println("\n");
 		
 			for (int j = 0; j < nbEtats; j++) {
 				maxProba = 0;
 				s = new State(j);
 				for (State clef : this.matriceTransition.transition.keySet()) {
-					System.out.println(this.matriceTransition.transition.get(clef).getProba(s)+" * "+prob[i][clef.num_etat]);
+					//System.out.println(this.matriceTransition.transition.get(clef).getProba(s)+" * "+prob[i][clef.num_etat]);
 					if(this.matriceTransition.transition.get(clef).getProba(s)*prob[i][clef.num_etat] > maxProba){
 						maxProba = this.matriceTransition.transition.get(clef).getProba(s)*prob[i][clef.num_etat];
 						etatAncetre = clef;
 					}
 				}
-				System.out.println();
-				System.out.println(s.toString()+" -> "+maxProba+"   "+etatAncetre);
-				System.out.println();
+				//System.out.println();
+				//System.out.println(s.toString()+" -> "+maxProba+"   "+etatAncetre);
+				//System.out.println();
 				initiale.setProba(s, maxProba);
 				ancetre[i][j] = etatAncetre;
 			}
-			System.out.println("\n"+initiale.toString()+"\n");
+			//System.out.println("\n"+initiale.toString()+"\n");
 			
 		}
 		
-		System.out.println("Les carrés : \n");
+		/*System.out.println("Les carrés : \n");
 		for (int i = 0; i < prob[0].length; i++) {
 			for (int j = 0; j < prob.length; j++) {
 				System.out.print(prob[j][i]+" ");
@@ -255,6 +256,25 @@ public class HMM {
 			}
 			System.out.println();
 		}
+		
+		System.out.println("\n\n");*/
+		
+		double max = 0;
+		int indice = 0;
+		for (int i = 0; i < prob[0].length; i++) {
+			if(prob[prob.length-1][i] > max){
+				max = prob[prob.length-1][i];
+				indice = i;
+			}
+		}
+		
+		//System.out.println(max+"  "+indice);
+		
+		for (int i = obs.size()-1; i >= 0; i--) {
+			res.add(ancetre[i][indice]);
+			indice = ancetre[i][indice].num_etat;
+		}
+		
 		return res;
 	}
 
