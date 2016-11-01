@@ -10,8 +10,24 @@ import tp4.hmm.State;
 public class MainViterbi {
 
 	public static void main(String[] args) {
-
-		// TODO
+		HMM filtrage = new HMM();
+		Distribution<State> distribInitiale = new Distribution<>();
+		State s0 = new State(0);
+		State s1 = new State(1);
+		distribInitiale.setProba(s0, 0.5);
+		distribInitiale.setProba(s1, 0.5);
+		
+		Observation o1 = new Observation(true, false);
+		Observation o2 = new Observation(false, true);
+		Observation o3 = new Observation(true, false);
+		Observation o4 = new Observation(false, false);
+		ArrayList<Observation> obs = new ArrayList<Observation>();
+		obs.add(obs.size(),o1);
+		obs.add(obs.size(),o2);
+		obs.add(obs.size(),o3);
+		obs.add(obs.size(),o4);
+		
+		filtrage.viterbi(obs, distribInitiale);
 	}
 
 }

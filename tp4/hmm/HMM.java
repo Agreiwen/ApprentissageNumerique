@@ -68,11 +68,11 @@ public class HMM {
 		for (State s1 : this.matriceTransition.transition.keySet()) {
 			proba = 0;
 			for (State s2 : this.matriceTransition.transition.keySet()) {
-				//System.out.println(proba+" + ("+this.matriceTransition.probaTransition(s2, s1)+" * "+d.getProba(s2)+")");
+				System.out.println(proba+" + ("+this.matriceTransition.probaTransition(s2, s1)+" * "+d.getProba(s2)+")");
 				proba += this.matriceTransition.probaTransition(s2, s1)*d.getProba(s2);
 			}
 			res.setProba(s1, proba);
-			//System.out.println("\n"+s1.toString()+" -> "+proba+"\n");
+			System.out.println("\n"+s1.toString()+" -> "+proba+"\n");
 		}
 		res.normalise();
 		return res;
@@ -193,8 +193,69 @@ public class HMM {
 		// données
 		// proba stocké dans un tableau qui associe à t et s une valeur
 		// ancetre stocke dans un tableau qui a t et a s associe un parent
-
-		throw new Error(); // ** A COMPLETER **
+		
+		ArrayList<State> res = new ArrayList<State>();
+		int nbIteration = obs.size();
+		int nbEtats = 8; // A voir comment mieux faire
+		double maxProba = 0;
+		State s = null;
+		State etatAncetre = null;
+		double[][] prob = new double[nbIteration][nbEtats];
+		State[][] ancetre = new State[nbIteration][nbEtats];
+		
+		//System.out.println("Distribution initiale : "+initiale.toString()+"\n\n");
+		
+		for (int i = 0; i < nbIteration; i++) {
+			for (int j = 0; j < nbEtats; j++) {
+				s = new State(j);
+				System.out.print(s.toString()+" ");
+				System.out.print(initiale.getProba(s)+" -> ");
+				System.out.print(this.matriceObservation.probaObservation(obs.get(i), s));
+				System.out.println(" |"+this.matriceObservation.probaObservation(obs.get(i), s)*initiale.getProba(s)+"| ");
+				prob[i][j] = this.matriceObservation.probaObservation(obs.get(i), s)*initiale.getProba(s);
+			}
+		
+		
+			System.out.println("\n");
+		
+			for (int j = 0; j < nbEtats; j++) {
+				maxProba = 0;
+				s = new State(j);
+				for (State clef : this.matriceTransition.transition.keySet()) {
+					System.out.println(this.matriceTransition.transition.get(clef).getProba(s)+" * "+prob[i][clef.num_etat]);
+					if(this.matriceTransition.transition.get(clef).getProba(s)*prob[i][clef.num_etat] > maxProba){
+						maxProba = this.matriceTransition.transition.get(clef).getProba(s)*prob[i][clef.num_etat];
+						etatAncetre = clef;
+					}
+				}
+				System.out.println();
+				System.out.println(s.toString()+" -> "+maxProba+"   "+etatAncetre);
+				System.out.println();
+				initiale.setProba(s, maxProba);
+				ancetre[i][j] = etatAncetre;
+			}
+			System.out.println("\n"+initiale.toString()+"\n");
+			
+		}
+		
+		System.out.println("Les carrés : \n");
+		for (int i = 0; i < prob[0].length; i++) {
+			for (int j = 0; j < prob.length; j++) {
+				System.out.print(prob[j][i]+" ");
+			}
+			System.out.println();
+		}
+		
+		System.out.println("\n\n");
+		
+		System.out.println("Ancetres : \n");
+		for (int i = 0; i < ancetre[0].length; i++) {
+			for (int j = 0; j < ancetre.length; j++) {
+				System.out.print(ancetre[j][i]+" ");
+			}
+			System.out.println();
+		}
+		return res;
 	}
 
 }

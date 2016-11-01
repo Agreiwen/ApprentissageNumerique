@@ -63,8 +63,8 @@ public class Observation {
 	@Override
 	public int hashCode() {
 		int premier = (obsCapteur1) ? 1 : 0;
-		int deuxime = (obsCapteur2) ? 1 : 0;
-		String res = ""+premier+deuxime;
+		int deuxieme = (obsCapteur2) ? 1 : 0;
+		String res = ""+premier+deuxieme;
 		int result = Integer.valueOf(res);
 		return result;
 	}
