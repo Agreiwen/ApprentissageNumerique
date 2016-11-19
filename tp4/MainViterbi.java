@@ -33,7 +33,7 @@ public class MainViterbi {
 		ArrayList<State> viterbi = new ArrayList<>();
 		viterbi = filtrage.viterbi(obs, distribInitiale);
 		
-		System.out.print("[");
+		System.out.print("Sequence d'états qui explique le mieux ces observations : [");
 		for (int i = viterbi.size()-1; i >=0; i--) {
 			String s = (i==0) ? viterbi.get(i).toString() : viterbi.get(i).toString()+", ";
 			System.out.print(s);
