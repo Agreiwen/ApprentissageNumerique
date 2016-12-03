@@ -12,6 +12,8 @@ public class QLearning {
 	public QValeur qVal;
 	protected final double gamma = 0.99;
 	public double[] sommeQValeurs;
+	double iteration = 1;
+	double nbIteration = 0;
 	
 	public QLearning(){
 		probleme = new ProblemeDevant();
@@ -32,22 +34,26 @@ public class QLearning {
 	
 	public void updateExperience(StateXYO depart, ActionOriente a, StateXYO arrivee, double recompense){
 		t.get(depart).put(a, t.get(depart).get(a)+1);
-		double alpha = (double)1/t.get(depart).get(a);
-		//System.out.println(alpha);
-		double ancienneQValeur = qVal.getVal(depart, a);
-		double nouvelleQValeur = (1-alpha)*ancienneQValeur+alpha*(probleme.recompense(depart, a, arrivee)+gamma*qVal.getValMax(arrivee));
-		//TODO Erreur dans la formulette qui fausse tout
-		//System.out.println(nouvelleQValeur);
+		double qValeurActuelle = qVal.getVal(depart, a);
+		double vitesseApprentissage = (double)1.0/t.get(depart).get(a);
+		double facteurActualisation = gamma;
+		double valeurOptimaleEstimee = qVal.getValMax(arrivee);
+		double valeurApprise = recompense + (facteurActualisation * valeurOptimaleEstimee);
+		double nouvelleQValeur = qValeurActuelle + vitesseApprentissage * (valeurApprise - qValeurActuelle);
 		qVal.setVal(depart, a, nouvelleQValeur);
 	}
 	
 	public ActionOriente choisirAction(){
 		ActionOriente actionEpsilonGreedy;
-		if(Math.random() > 0.2){
+		//epsilonGreedy va partir de 1 jusque 0 dans le but de faire une exploration totale au debut et
+		//en faire de moins en moins par la suite
+		double epsilonGreedy = (double) 1.0 - iteration / nbIteration;
+		//double epsilonGreedy = 0.8;
+		if(Math.random() >= 1-epsilonGreedy){
 			actionEpsilonGreedy = qVal.getActionMax(etatCourant);
 		}else{
 			ArrayList<ActionOriente> listeAction = (ArrayList<ActionOriente>) probleme.allAction();
-			actionEpsilonGreedy = listeAction.get((int)Math.random()*(listeAction.size()-1));
+			actionEpsilonGreedy = listeAction.get((int)(Math.random()*listeAction.size()));
 		}
 		return actionEpsilonGreedy;
 	}
@@ -57,16 +63,16 @@ public class QLearning {
 		StateXYO etatArrivee = probleme.transition(etatCourant, actionEpsilonGreedy).tirage();
 		double recompense = probleme.recompense(etatCourant, actionEpsilonGreedy, etatArrivee);
 		updateExperience(etatCourant, actionEpsilonGreedy, etatArrivee, recompense);
-		//System.out.println(etatCourant+" "+actionEpsilonGreedy+" "+etatArrivee+" "+recompense);
 		etatCourant = etatArrivee;
 	}
 	
 	public void replacerAleatoirement(){
 		ArrayList<StateXYO> listeEtat = probleme.allState();
-		etatCourant = listeEtat.get((int)Math.random()*(listeEtat.size()-1));
+		etatCourant = listeEtat.get((int)(Math.random()*listeEtat.size()));
 	}
 	
 	public void apprendre(long n){
+		nbIteration = (double)n;
 		sommeQValeurs = new double[(int) (n+1)];
 		sommeQValeurs[0] = qVal.somme();
 		for (int i = 0; i < n; i++) {
@@ -75,6 +81,7 @@ public class QLearning {
 			}
 			effectuerUneIteration();
 			sommeQValeurs[i+1] = qVal.somme();
+			iteration++;
 		}
 	}
 
