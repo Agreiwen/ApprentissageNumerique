@@ -17,17 +17,22 @@ public class LecteurDonnees {
         int nbLigne = 0;
         int ligne = 0;
         String[] separated;
+        String[] colonne;
         BufferedReader br1, br2;
         br1 = new BufferedReader(new FileReader(fichier));
  
         System.out.print("Lecture fichier... ");
+        st = br1.readLine();
+        colonne = st.split(",");
         while ((st = br1.readLine()) != null) {
             nbLigne++;
+           
         }
         br1.close();
-        
-        tailleBaseApp = nbLigne;
-        x = new double[tailleBaseApp][4];
+       // System.out.println("colonne longueur"+colonne.length);
+      //  System.out.println("j'ai "+nbLigne);
+        tailleBaseApp = nbLigne+1;
+        x = new double[tailleBaseApp][colonne.length-1];
         y = new String[tailleBaseApp];
         
         br2 = new BufferedReader(new FileReader(fichier));

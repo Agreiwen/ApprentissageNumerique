@@ -137,7 +137,7 @@ public class ClassifieurKNN extends Exception{
 		}
 		
 		HashMap<String,Integer> comptage = new HashMap<>();
-		for (int i = 0; i < 90; i++) {
+		for (int i = 0; i < (6*nbElementParBloc); i++) {
 			if(!comptage.containsKey(etiquetteApprentissage[i])){
 				comptage.put(etiquetteApprentissage[i], 0);
 			}
@@ -166,6 +166,7 @@ public class ClassifieurKNN extends Exception{
 			throw new ClassifieurKNN("Impossible de diviser en "+nbBlocs);
 		this.nbBlocs = nbBlocs;
 		this.nbElementParBloc = nbElementParBloc;
+		//System.out.println("Element par bloc"+this.nbElementParBloc);
 		blocs = new double[nbBlocs][nbElementParBloc][x[0].length];
 		for (int i = 0; i < nbBlocs; i++) {
 			for (int j = 0; j < nbElementParBloc; j++) {
@@ -244,7 +245,7 @@ public class ClassifieurKNN extends Exception{
 					//affichageBloc(blocValidation);
 					erreurSurBlocValidation = Double.MAX_VALUE;
 					for (int k = 3; k <= 8; k++) {
-						System.out.println("		Nombre de voisin k : "+k+"\n");
+						//System.out.println("		Nombre de voisin k : "+k+"\n");
 						//System.out.println("			BaseApprentissage : \n");
 						app = new ArrayList<Integer>();
 						for (int a = 0; a < nbBlocs; a++) {
@@ -252,8 +253,8 @@ public class ClassifieurKNN extends Exception{
 								app.add(a);
 							}
 						}
-						blocApprentissage = fusionTableauxApprentissage(blocs[app.get(0)], fusionTableauxApprentissage(blocs[app.get(1)], blocs[app.get(2)]));
-						etiquetteApprentissage = fusionTableauxEtiqutte(blocsEtiquette[app.get(0)], fusionTableauxEtiqutte(blocsEtiquette[app.get(1)], blocsEtiquette[app.get(2)]));
+						blocApprentissage = fusionTableauxApprentissage(blocs[app.get(0)], fusionTableauxApprentissage(blocs[app.get(1)], fusionTableauxApprentissage(blocs[app.get(2)],fusionTableauxApprentissage(blocs[app.get(3)],fusionTableauxApprentissage(blocs[app.get(4)],blocs[app.get(5)])))));
+						etiquetteApprentissage = fusionTableauxEtiqutte(blocsEtiquette[app.get(0)], fusionTableauxEtiqutte(blocsEtiquette[app.get(1)], fusionTableauxEtiqutte(blocsEtiquette[app.get(2)],fusionTableauxEtiqutte(blocsEtiquette[app.get(3)],fusionTableauxEtiqutte(blocsEtiquette[app.get(4)],blocsEtiquette[app.get(5)])))));
 						this.k = k;
 						double erreur = erreurKNN(v);
 						if(erreur < erreurSurBlocValidation){
