@@ -29,8 +29,7 @@ public class LecteurDonnees {
            
         }
         br1.close();
-       // System.out.println("colonne longueur"+colonne.length);
-      //  System.out.println("j'ai "+nbLigne);
+
         tailleBaseApp = nbLigne+1;
         x = new double[tailleBaseApp][colonne.length-1];
         y = new String[tailleBaseApp];

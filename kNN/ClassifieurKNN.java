@@ -115,7 +115,7 @@ public class ClassifieurKNN extends Exception{
 		System.out.println("OK\n");
 	}
 	
-	String prediction(double[] xt, int K, int v) {
+	String prediction(double[] xt, int K) {
 		double[] distance = new double[blocApprentissage.length];
 		for (int i = 0; i < blocApprentissage.length; i++) {
 			distance[i] = distance(blocApprentissage[i],xt);
@@ -166,19 +166,15 @@ public class ClassifieurKNN extends Exception{
 			throw new ClassifieurKNN("Impossible de diviser en "+nbBlocs);
 		this.nbBlocs = nbBlocs;
 		this.nbElementParBloc = nbElementParBloc;
-		//System.out.println("Element par bloc"+this.nbElementParBloc);
 		blocs = new double[nbBlocs][nbElementParBloc][x[0].length];
-		for (int i = 0; i < nbBlocs; i++) {
-			for (int j = 0; j < nbElementParBloc; j++) {
-				blocs[i][j] = x[j+(i*nbElementParBloc)];
-			}
-		}
 		blocsEtiquette = new String[nbBlocs][nbElementParBloc];
 		for (int i = 0; i < nbBlocs; i++) {
 			for (int j = 0; j < nbElementParBloc; j++) {
+				blocs[i][j] = x[j+(i*nbElementParBloc)];
 				blocsEtiquette[i][j] = y[j+(i*nbElementParBloc)];
 			}
 		}
+		
 	}
 
 	double[][] fusionTableauxApprentissage(double tab1[][], double tab2[][]){
@@ -229,43 +225,72 @@ public class ClassifieurKNN extends Exception{
 		y = yMelange;
 	}
 	
-	void validationCroisee(){
-		HashMap<Integer, Double> res = new HashMap<Integer, Double>(); 
+	void validationCroisee() {
+		HashMap<Integer, Double> res = new HashMap<Integer, Double>();
 		int meilleurK = 0;
-		double erreurSurBlocValidation;
+		double erreurSurBlocValidation, erreurSurBlocTest;
+		double sommeerreurtest = 0;
+		int cptmp = 0;
 		ArrayList<Integer> app;
+		double cpt = 0;
+		int cpt2 = 0;
 		for (int t = 0; t < nbBlocs; t++) {
+
 			this.blocTest = blocs[t];
-			System.out.println("\nBaseTest : "+t+"\n");
-			//affichageBloc(blocTest);
+			System.out.println("\nBaseTest : " + t);
+			erreurSurBlocTest = Double.MAX_VALUE;
+			int[] kbest = new int[9];
 			for (int v = 0; v < nbBlocs; v++) {
-				if(v != t){
-					System.out.println("	BaseValidation : "+v+"\n");
+				if (v != t) {
 					this.blocValidation = blocs[v];
-					//affichageBloc(blocValidation);
 					erreurSurBlocValidation = Double.MAX_VALUE;
-					for (int k = 3; k <= 8; k++) {
-						//System.out.println("		Nombre de voisin k : "+k+"\n");
-						//System.out.println("			BaseApprentissage : \n");
-						app = new ArrayList<Integer>();
-						for (int a = 0; a < nbBlocs; a++) {
-							if(a != t && a != v){
-								app.add(a);
-							}
+					app = new ArrayList<Integer>();
+					for (int a = 0; a < nbBlocs; a++) {
+						if (a != t && a != v) {
+							app.add(a);
 						}
-						blocApprentissage = fusionTableauxApprentissage(blocs[app.get(0)], fusionTableauxApprentissage(blocs[app.get(1)], fusionTableauxApprentissage(blocs[app.get(2)],fusionTableauxApprentissage(blocs[app.get(3)],fusionTableauxApprentissage(blocs[app.get(4)],blocs[app.get(5)])))));
-						etiquetteApprentissage = fusionTableauxEtiqutte(blocsEtiquette[app.get(0)], fusionTableauxEtiqutte(blocsEtiquette[app.get(1)], fusionTableauxEtiqutte(blocsEtiquette[app.get(2)],fusionTableauxEtiqutte(blocsEtiquette[app.get(3)],fusionTableauxEtiqutte(blocsEtiquette[app.get(4)],blocsEtiquette[app.get(5)])))));
+					}
+					blocApprentissage = fusionTableauxApprentissage(blocs[app.get(0)],
+							fusionTableauxApprentissage(blocs[app.get(1)],
+									fusionTableauxApprentissage(blocs[app.get(2)], fusionTableauxApprentissage(
+											blocs[app.get(3)], fusionTableauxApprentissage(blocs[app.get(4)],
+													blocs[app.get(5)])))));
+					etiquetteApprentissage = fusionTableauxEtiqutte(blocsEtiquette[app.get(0)], fusionTableauxEtiqutte(
+							blocsEtiquette[app.get(1)],
+							fusionTableauxEtiqutte(blocsEtiquette[app.get(2)], fusionTableauxEtiqutte(
+									blocsEtiquette[app.get(3)],
+									fusionTableauxEtiqutte(blocsEtiquette[app.get(4)], blocsEtiquette[app.get(5)])))));
+					for (int k = 1; k <= 8; k++) {
 						this.k = k;
 						double erreur = erreurKNN(v);
-						if(erreur < erreurSurBlocValidation){
+						if (erreur < erreurSurBlocValidation) {
 							erreurSurBlocValidation = erreur;
 							meilleurK = this.k;
 						}
 					}
-					System.out.println("	Erreur sur blocValidation : "+erreurSurBlocValidation+"% Meilleur k : "+meilleurK+"\n");
+					kbest[meilleurK]++;
+					System.out.println("	Erreur sur blocValidation numéro " + v + " : "
+							+ Math.round(erreurSurBlocValidation * 100) / 100 + "% Meilleur k : " + meilleurK);
 				}
 			}
+			int bestkiter = 0;
+			int kmoy = 0;
+			for (int i = 0; i < kbest.length; i++) {
+				if (bestkiter < kbest[i]) {
+					kmoy = i;
+					bestkiter = kbest[i];
+				}
+			}
+			cptmp++;
+			erreurSurBlocTest = perfKNN(t, kmoy);
+			sommeerreurtest += erreurSurBlocTest;
+			System.out.println("Erreur sur blocTest : " + Math.round(erreurSurBlocTest * 100) / 100
+					+ "% en utilisant le meilleur k : " + kmoy + "\n");
+
 		}
+
+		System.out.println(
+				"Moyenne des erreurs de test totale : " + Math.round((sommeerreurtest / cptmp) * 100) / 100 + "%");
 	}
 
 	double erreurKNN(int v) {
@@ -274,7 +299,7 @@ public class ClassifieurKNN extends Exception{
 		double[] vecteur = new double[x[0].length];
 		for (int i = 0; i < blocValidation.length; i++) {
 			vecteur = blocValidation[i];
-			etiquette = prediction(vecteur, this.k, v);
+			etiquette = prediction(vecteur, this.k);
 			verifEtiquette = y[nbElementParBloc*v+i];
 			if(!etiquette.equals(verifEtiquette))
 				erreur ++;
@@ -288,7 +313,7 @@ public class ClassifieurKNN extends Exception{
 		double[] vecteur = new double[x[0].length];
 		for (int i = 0; i < blocTest.length; i++) {
 			vecteur = blocTest[i];
-			etiquette = prediction(vecteur, k, t);
+			etiquette = prediction(vecteur, k);
 			verifEtiquette = y[nbElementParBloc*t+i];
 			if(!etiquette.equals(verifEtiquette))
 				erreur ++;
